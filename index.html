@@ -1,76 +1,83 @@
 <!DOCTYPE html>
 <html lang="en-us">
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Unity Web Player | WebGL_Sure</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <style>
-        /* Transparent, tyst template – ingen intern loader/overlay */
-        html, body {
-            margin: 0;
-            height: 100%;
-            background: transparent;
-        }
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Unity Web Player | SlimShady</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
-        #unity-container {
-            position: fixed;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            left: 0;
-        }
+  <!-- Viktigt: korrekt base-path för GitHub Pages -->
+  <base href="/slimshady/">
 
-        #unity-canvas {
-            width: 100%;
-            height: 100%;
-            display: block;
-            background: transparent;
-            touch-action: none;
-        }
-    </style>
+  <style>
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: transparent;
+      overscroll-behavior: none;
+      touch-action: none;
+    }
+    #unity-container {
+      position: fixed;
+      inset: 0;
+    }
+    #unity-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      background: transparent;
+      touch-action: none;
+    }
+  </style>
 </head>
 <body>
-    <div id="unity-container">
-        <canvas id="unity-canvas" width=960 height=600 tabindex="-1"></canvas>
-    </div>
+  <div id="unity-container">
+    <canvas id="unity-canvas" width="960" height="600" tabindex="-1"></canvas>
+  </div>
 
-    <script src="Build/a228fd7b2678835e4547d00de961351e.loader.js"></script>
-    <script>
-    /* @ts-nocheck */  // Tysta VS Code/TS-fel på Unitys #if/#endif-rader
+  <script src="Build/a228fd7b2678835e4547d00de961351e.loader.js?v=build1"></script>
+  <script>
+  /* @ts-nocheck */
+  (function () {
+    const canvas = document.getElementById('unity-canvas');
 
-    (function () {
-      const canvas = document.getElementById('unity-canvas');
+    const isMobile = /Android|iPhone|iPad|iPod|iOS/i.test(navigator.userAgent);
+    const DPR = isMobile ? 1 : Math.min(window.devicePixelRatio || 1, 2);
 
-      // Höj cap för skärpa: 1.5 -> 2
-      const DPR = Math.min(window.devicePixelRatio || 1, 2);
+    const BUST = 'v=build1';
 
-      const config = {
-        arguments: [],
-        dataUrl: "Build/bd989e8ca199f78d729285e19ddd2997.data.unityweb",
-        frameworkUrl: "Build/533d389e59d7b93f448eb206f36cb57a.framework.js.unityweb",
-        codeUrl: "Build/a8afbe6ddbdf2dbc258185b814cd729d.wasm.unityweb",
-        streamingAssetsUrl: "StreamingAssets",
-        companyName: "DefaultCompany",
-        productName: "WebGL_Sure",
-        productVersion: "1.0",
-        matchWebGLToCanvasSize: true,
-        devicePixelRatio: DPR
-      };
+    const config = {
+      arguments: [],
+      dataUrl: "Build/bd989e8ca199f78d729285e19ddd2997.data.unityweb?" + BUST,
+      frameworkUrl: "Build/533d389e59d7b93f448eb206f36cb57a.framework.js.unityweb?" + BUST,
+      codeUrl: "Build/a8afbe6ddbdf2dbc258185b814cd729d.wasm.unityweb?" + BUST,
+      streamingAssetsUrl: "StreamingAssets",
+      companyName: "DefaultCompany",
+      productName: "SlimShady",
+      productVersion: "1.0",
+      matchWebGLToCanvasSize: true,
+      devicePixelRatio: DPR,
+      webglContextAttributes: {
+        alpha: true,
+        antialias: false,
+        desynchronized: true,
+        powerPreference: 'low-power',
+        preserveDrawingBuffer: false
+      }
+    };
 
-      function post(msg) { try { parent.postMessage(msg, '*'); } catch(e){} }
+    window.addEventListener('error', e => console.error('WindowError:', e.message || e));
+    window.addEventListener('unhandledrejection', e => console.error('UnhandledRejection:', e.reason || e));
 
-      // Skicka riktig progress till eventuell föräldersida
-      createUnityInstance(canvas, config, function(progress){
-        post({ type: 'unity-progress', value: progress }); // value 0..1
-      }).then(function(instance){
-        window.unityInstance = instance;
-        post({ type: 'unity-ready' }); // klart
-      }).catch(function(err){
-        console.error(err);
-        post({ type: 'unity-error', message: String(err) });
-      });
-    })();
-    </script>
+    createUnityInstance(canvas, config, function(progress){
+      console.log("Progress:", progress);
+    }).then(function(instance){
+      window.unityInstance = instance;
+      console.log("Unity ready");
+    }).catch(function(err){
+      console.error("Unity error:", err);
+    });
+  })();
+  </script>
 </body>
 </html>
